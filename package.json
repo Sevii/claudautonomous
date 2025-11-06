@@ -1,0 +1,30 @@
+{
+  "name": "langchain-gemini-audio-example",
+  "version": "1.0.0",
+  "description": "Example of using LangChain with Google Gemini for audio transcription and tool binding",
+  "main": "gemini-audio-example.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx gemini-audio-example.ts",
+    "build": "tsc"
+  },
+  "keywords": [
+    "langchain",
+    "gemini",
+    "audio",
+    "transcription",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@langchain/google-genai": "^0.2.0",
+    "@langchain/core": "^0.3.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
