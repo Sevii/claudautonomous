@@ -1,0 +1,11 @@
+# Place your sample audio files here
+
+Example:
+- sample-audio.wav
+- test-recording.mp3
+- interview.m4a
+
+Convert audio to the recommended format using ffmpeg:
+```bash
+ffmpeg -i input.mp3 -ar 16000 -ac 1 -sample_fmt s16 output.wav
+```

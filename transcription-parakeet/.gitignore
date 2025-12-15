@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.Python
+env/
+venv/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Models (large files)
+models/
+*.onnx
+*.nemo
+
+# Audio files
+examples/*.wav
+examples/*.flac
+examples/*.mp3
+*.wav
+*.flac
+*.mp3
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
