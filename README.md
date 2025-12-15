@@ -13,6 +13,7 @@ The repository is organized into subdirectories, each containing a specific inte
 - `transcription-whisper/` - Whisper.cpp integration examples
 - `transcription-parakeet/` - NVIDIA Parakeet v2 transcription implementation
 - `langchain-gemini-audio/` - LangChain and Gemini audio examples
+- `nws-weather-api/` - National Weather Service API integration with HTML rendering
 
 More examples will be added as the project grows.
 

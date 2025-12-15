@@ -1,0 +1,24 @@
+{
+  "name": "nws-weather-api-example",
+  "version": "1.0.0",
+  "description": "Example demonstrating National Weather Service API integration",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "demo": "ts-node src/demo.ts"
+  },
+  "keywords": ["weather", "nws", "api", "typescript"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/node-fetch": "^2.6.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
