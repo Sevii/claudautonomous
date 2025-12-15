@@ -1,0 +1,32 @@
+{
+  "name": "transcription-parakeet",
+  "version": "1.0.0",
+  "description": "TypeScript examples for using NVIDIA Parakeet v2 transcription model locally",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start:onnx": "npm run build && node dist/onnx-example.js",
+    "start:python": "npm run build && node dist/python-wrapper.js",
+    "setup:python": "pip install nemo_toolkit[asr] onnx onnxruntime",
+    "download:model": "python scripts/download_model.py"
+  },
+  "keywords": [
+    "parakeet",
+    "nvidia",
+    "transcription",
+    "asr",
+    "speech-to-text",
+    "onnx",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "onnxruntime-node": "^1.20.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
