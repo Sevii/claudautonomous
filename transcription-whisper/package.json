@@ -1,0 +1,27 @@
+{
+  "name": "transcription-whisper",
+  "version": "1.0.0",
+  "description": "TypeScript examples for using whisper.cpp for local audio transcription",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "example:nodejs-whisper": "ts-node src/example-nodejs-whisper.ts",
+    "example:whisper-node": "ts-node src/example-whisper-node.ts",
+    "example:official-addon": "ts-node src/example-official-addon.ts"
+  },
+  "keywords": [
+    "whisper",
+    "transcription",
+    "speech-to-text",
+    "typescript"
+  ],
+  "dependencies": {
+    "nodejs-whisper": "^1.1.1",
+    "whisper-node": "^1.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
