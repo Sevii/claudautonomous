@@ -1,0 +1,13 @@
+# Ignore audio files (they can be large)
+sounds/*.mp3
+sounds/*.wav
+sounds/*.ogg
+
+# Keep the sounds directory
+!sounds/.gitkeep
+
+# Ignore log files
+*.log
+
+# Ignore PID files
+*.pid
