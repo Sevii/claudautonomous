@@ -1,0 +1,33 @@
+{
+  "name": "wake-word-detection",
+  "version": "1.0.0",
+  "description": "Wake word detection for Electron using openWakeWord with ONNX runtime",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/example.ts",
+    "download-models": "ts-node src/download-models.ts",
+    "test": "ts-node src/test-detection.ts"
+  },
+  "keywords": [
+    "wake-word",
+    "voice-detection",
+    "electron",
+    "openwakeword",
+    "onnx"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "onnxruntime-node": "^1.17.0",
+    "node-record-lpcm16": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
