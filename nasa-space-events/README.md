@@ -18,14 +18,26 @@ The timeline visualization shows the propagation delay between solar explosions 
 
 ## Installation
 
+Using [uv](https://docs.astral.sh/uv/):
+
 ```bash
-pip install -r requirements.txt
+uv sync
+```
+
+Or run directly without installing:
+
+```bash
+uv run space_weather_timeline.py
 ```
 
 ## Usage
 
 ```bash
-python space_weather_timeline.py
+# Run with uv
+uv run space_weather_timeline.py
+
+# Or if you've synced dependencies
+uv run python space_weather_timeline.py
 ```
 
 The script fetches the last 30 days of space weather data and generates:
