@@ -1,0 +1,13 @@
+[project]
+name = "nasa-space-events"
+version = "0.1.0"
+description = "NASA DONKI Space Weather Timeline Visualization"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.28.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.scripts]
+space-weather = "space_weather_timeline:main"
