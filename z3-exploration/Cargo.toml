@@ -1,0 +1,10 @@
+[package]
+name = "z3-exploration"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# The "vendored" feature builds Z3 from source so you don't need a system install.
+# Without it, you need Z3 ≥ 4.8.17 installed (e.g. `apt install libz3-dev`).
+# Other options: "vcpkg", "gh-release" (downloads prebuilt binaries from GitHub).
+z3 = { version = "0.20", features = ["vendored"] }
