@@ -407,6 +407,12 @@ generateDeductions: () => {
 
 7. **T-shape detection has dead code**: The `findTShapedRegions` function has two overlapping detection approaches — the first uses row/column count analysis, and then there's additional code checking `leftCol`/`middleColCells`/`rightColCells` that can produce contradictory results since `middleCell` and `stemCell` may be overwritten.
 
+8. **`GridState` type not exported**: `game-state.ts` defines `GridState` as a local interface but never exports it. `example-puzzles.ts` imports it with `import type { GridState } from './game-state'`, which should cause a TypeScript compilation error in strict mode.
+
+9. **Server-side is unused boilerplate**: The Express server, Drizzle ORM setup, and database schema (only a `users` table) are scaffolding from the Replit template. All puzzle logic is entirely client-side — the server only serves the SPA in production.
+
+10. **Sandwich pattern only checks rows**: Like `findBasicDeductions`, the `findSandwichPatterns` function iterates over rows but never applies the same logic to columns, missing half the potential deductions.
+
 ---
 
 ## Potential Improvements
