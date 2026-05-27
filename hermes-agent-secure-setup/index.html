@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Securely Deploying Hermes Agent on DigitalOcean with OpenRouter</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1d212b;
+    --text: #e6e9ef;
+    --muted: #9aa3b2;
+    --accent: #6ee7b7;
+    --accent-2: #7dd3fc;
+    --border: #2a2f3a;
+    --code-bg: #11141a;
+    --warn-bg: #2a1f12;
+    --warn-border: #7a5512;
+    --warn-text: #f5c97a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; }
+  .sub { color: var(--muted); margin: 0; }
+  h2 {
+    font-size: 1.35rem;
+    margin: 44px 0 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  h3 { font-size: 1.08rem; margin: 28px 0 8px; color: var(--accent-2); }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: "SF Mono", "Cascadia Code", Consolas, Menlo, monospace;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  pre code { background: none; border: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .callout {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    color: var(--warn-text);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 20px 0;
+  }
+  .callout strong { color: #ffd591; }
+  .lead {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 24px 0;
+  }
+  .toc h2 { border: none; margin: 0 0 8px; padding: 0; font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin: 4px 0; }
+  ul.checklist { list-style: none; padding-left: 0; }
+  ul.checklist li { padding: 4px 0 4px 28px; position: relative; }
+  ul.checklist li::before {
+    content: "\2610";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 1.1em;
+  }
+  .sources li { margin: 6px 0; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Securely Deploying Hermes Agent</h1>
+  <p class="sub">A hardened setup guide for DigitalOcean &middot; OpenRouter</p>
+</header>
+
+<p class="lead">
+  <a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">Hermes Agent</a>
+  is an open-source (MIT) autonomous agent from
+  <a href="https://nousresearch.com" target="_blank" rel="noopener">Nous Research</a>
+  that runs on <em>your</em> infrastructure, has persistent memory, writes its own skills, can
+  browse the web, and &mdash; critically &mdash; <strong>executes shell commands and code</strong>.
+  It connects to messaging gateways (Telegram / Discord / Slack / etc.) and exposes an optional
+  web dashboard plus an OpenAI-compatible API server.
+</p>
+
+<p>Two facts drive every security decision below:</p>
+<ol>
+  <li>It runs arbitrary commands, so the host it touches should be treated as <strong>disposable and untrusted</strong>.</li>
+  <li>It listens on the network (gateway + dashboard + API), so <strong>inbound exposure must be locked down</strong>.</li>
+</ol>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#arch">Recommended architecture</a></li>
+    <li><a href="#droplet">1. Droplet sizing &amp; base hardening</a></li>
+    <li><a href="#docker">2. Run Hermes in Docker (the sandbox)</a></li>
+    <li><a href="#openrouter">3. OpenRouter as provider (secrets)</a></li>
+    <li><a href="#network">4. Network exposure &mdash; keep it shut</a></li>
+    <li><a href="#guardrails">5. Agent guardrails</a></li>
+    <li><a href="#service">6. Run as a service</a></li>
+    <li><a href="#checklist">Quick checklist</a></li>
+    <li><a href="#sources">Sources</a></li>
+  </ol>
+</nav>
+
+<h2 id="arch">Recommended architecture</h2>
+<p>
+  <strong>One dedicated DigitalOcean droplet &rarr; Hermes inside Docker &rarr; OpenRouter as the
+  model provider &rarr; no inbound ports except SSH.</strong>
+  Talk to it via a messaging gateway (outbound) or an SSH tunnel to the dashboard. This way, even if
+  the agent goes off the rails, it is confined to a container on a throwaway VM.
+</p>
+
+<h2 id="droplet">1. Droplet sizing &amp; base hardening</h2>
+<ul>
+  <li><strong>Size:</strong> Ubuntu 24.04 LTS. 4&nbsp;GB RAM / 2&nbsp;vCPU / 20&nbsp;GB+ disk if you use
+    browser automation (Playwright/Chromium needs ~2&nbsp;GB on its own). 2&nbsp;GB / 10&nbsp;GB is the
+    bare minimum without browsing.</li>
+  <li><strong>Non-root user:</strong> create a <code>hermes</code> user; never run the agent as root.</li>
+  <li><strong>SSH:</strong> key-only auth, disable password login (<code>PasswordAuthentication no</code>),
+    ideally limit or change the SSH port.</li>
+  <li><strong>DigitalOcean Cloud Firewall:</strong> inbound = SSH (22) <em>from your IP only</em>; deny
+    everything else. Leave outbound open (it must reach OpenRouter + messaging APIs). Enable host
+    <code>ufw</code> as defense-in-depth.</li>
+  <li>Enable automatic security updates; keep DO snapshots/backups so you can nuke-and-restore.</li>
+</ul>
+
+<h2 id="docker">2. Run Hermes in Docker (the sandbox)</h2>
+<p>
+  The official image deprivileges to a non-root <code>hermes</code> user (UID&nbsp;10000) and keeps all
+  state in a single mounted directory at <code>/opt/data</code>. Run it with resource limits and
+  auto-restart:
+</p>
+<pre><code>docker run -d --name hermes \
+  --restart unless-stopped \
+  --memory=4g --cpus=2 \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent gateway run</code></pre>
+<p>
+  Because the whole agent lives in this container, its <code>terminal.backend: local</code> commands
+  execute <em>inside</em> the container, isolated from the droplet host. For an extra layer you can set
+  <code>terminal.backend: docker</code>, but nested Docker on a dedicated VM is usually overkill.
+</p>
+
+<h2 id="openrouter">3. OpenRouter as provider (secrets handling)</h2>
+<p>
+  Get a key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>,
+  then keep it in the mounted <code>.env</code> &mdash; never in <code>config.yaml</code>, never committed:
+</p>
+<pre><code>hermes config set OPENROUTER_API_KEY sk-or-...        # writes to ~/.hermes/.env
+hermes config set model.provider openrouter
+hermes config set model ~anthropic/claude-sonnet-latest</code></pre>
+<ul>
+  <li>The model must support <strong>&ge;&nbsp;64K context</strong> or it is rejected at startup.</li>
+  <li>For CI / secrets-manager flows, pass <code>-e OPENROUTER_API_KEY=...</code> on
+    <code>docker run</code> to override <code>.env</code> and keep keys off disk.</li>
+  <li>On OpenRouter, <strong>set a credit limit / spend cap on the key</strong> &mdash; an autonomous
+    agent in a loop can burn budget fast. Use a cheaper auxiliary model for compression, vision, titles,
+    and web summarization to save cost.</li>
+</ul>
+
+<h2 id="network">4. Network exposure &mdash; keep it shut</h2>
+<div class="callout">
+  <strong>From the docs:</strong> &ldquo;Opening any port on an internet-facing machine is a security
+  risk. You should not do it unless you understand the risks.&rdquo; The dashboard and API server bind
+  to <code>127.0.0.1</code> by default &mdash; leave it that way.
+</div>
+<p>To reach the dashboard, use an SSH tunnel from your laptop instead of exposing it:</p>
+<pre><code>ssh -L 8642:127.0.0.1:8642 hermes@&lt;droplet-ip&gt;</code></pre>
+<p>If you <em>must</em> expose the API server, require a key and front it with TLS:</p>
+<pre><code>docker run ... -e API_SERVER_KEY="$(openssl rand -hex 32)" ...</code></pre>
+<ul>
+  <li>Never set <code>HERMES_DASHBOARD_HOST=0.0.0.0</code> raw on the open internet &mdash; put a TLS
+    reverse proxy (Caddy / nginx) in front.</li>
+  <li>Prefer reaching it through a <strong>messaging gateway</strong> (Telegram bot, etc.), which is
+    outbound-only and needs no open inbound port.</li>
+</ul>
+
+<h2 id="guardrails">5. Agent guardrails (config.yaml)</h2>
+<pre><code>security:
+  redact_secrets: true       # mask API-key patterns in logs
+  tirith_enabled: true       # scan commands for dangerous ops
+  approvals:
+    mode: manual             # manual | smart | off  -> never "off" outside a sandbox</code></pre>
+<p>
+  Start with <code>approvals: manual</code> so you confirm flagged commands; relax to <code>smart</code>
+  only once you trust it. Disable toolsets you do not need
+  (<code>agent.disabled_toolsets: [web, ...]</code>) to shrink the attack surface.
+</p>
+
+<h2 id="service">6. Run as a service</h2>
+<p>
+  Docker <code>--restart unless-stopped</code> (or a Compose file with
+  <code>deploy.resources.limits</code>) gives supervised restarts via s6-overlay as PID&nbsp;1.
+</p>
+<pre><code>services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    volumes:
+      - ~/.hermes:/opt/data
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: "2.0"</code></pre>
+<div class="callout">
+  <strong>Never</strong> point two gateway containers at the same <code>~/.hermes</code> directory
+  &mdash; session files are not concurrent-write safe. Use separate dirs + ports per profile.
+</div>
+
+<h2 id="checklist">Quick checklist</h2>
+<ul class="checklist">
+  <li>Dedicated, disposable droplet; non-root user; key-only SSH</li>
+  <li>DO firewall: inbound SSH-from-my-IP only</li>
+  <li>Hermes in Docker with mem + cpu limits and a restart policy</li>
+  <li>OpenRouter key in <code>.env</code>; spend cap set on the key</li>
+  <li>Dashboard / API on <code>127.0.0.1</code>; reach via SSH tunnel or messaging gateway</li>
+  <li><code>approvals: manual</code>, <code>tirith_enabled: true</code>, <code>redact_secrets: true</code></li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ul class="sources">
+  <li><a href="https://github.com/NousResearch/hermes-agent/blob/main/website/docs/getting-started/installation.md" target="_blank" rel="noopener">Hermes Agent &mdash; Installation</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">Hermes Agent &mdash; Configuration</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/docker" target="_blank" rel="noopener">Hermes Agent &mdash; Docker</a></li>
+  <li><a href="https://openrouter.ai/docs/cookbook/coding-agents/hermes-integration" target="_blank" rel="noopener">OpenRouter &mdash; Hermes integration</a></li>
+  <li><a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">NousResearch/hermes-agent (GitHub)</a></li>
+  <li><a href="https://www.agntable.com/blog/how-to-self-host-hermes-agent" target="_blank" rel="noopener">How to Self-Host Hermes Agent (guide)</a></li>
+</ul>
+
+<footer>
+  Compiled from official Hermes Agent &amp; OpenRouter documentation. Verify commands against the latest
+  upstream docs before deploying &mdash; the project ships frequent releases.
+</footer>
+</div>
+</body>
+</html>
