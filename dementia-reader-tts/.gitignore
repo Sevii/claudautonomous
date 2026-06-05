@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Generated output and large model/voice assets
+/output/
+voices/refs/*.wav
+voices/refs/*.mp3
+voices/refs/*.flac
+
+# Keep the refs directory tracked but ignore the (large) audio inside it
+!voices/refs/.gitkeep

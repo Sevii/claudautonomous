@@ -1,0 +1,6 @@
+id = "the-quiet-garden"
+title = "The Quiet Garden"
+chapters = [
+    "chapter-01.txt",
+    "chapter-02.txt",
+]
