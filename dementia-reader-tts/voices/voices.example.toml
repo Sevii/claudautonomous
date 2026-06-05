@@ -1,0 +1,41 @@
+# Narrator voices for the dementia reader.
+#
+# Three synthesized voices + a "Mute" UI state (Mute is added automatically by
+# the packager; it is not listed here because nothing is synthesized for it).
+#
+# All voices are tuned for the same delivery: natural, unhurried, conversational,
+# low-arousal warmth. Keep `exaggeration` and `cfg_weight` low for calm pacing.
+#
+#   reference_audio -> used by cloning backends (Chatterbox). Record ~10-20s of
+#                      the target delivery: slow, warm, steady. WAV, mono, 24kHz.
+#   preset          -> used by preset backends (Kokoro), ignored by Chatterbox.
+
+[[voice]]
+id = "baritone"
+label = "Resonant Baritone"
+description = "Deep, steady, and grounding."
+reference_audio = "voices/refs/baritone.wav"
+preset = "bm_george"          # Kokoro: British male, low register
+exaggeration = 0.28
+cfg_weight = 0.32
+speed = 0.90
+
+[[voice]]
+id = "tenor"
+label = "Warm Tenor"
+description = "Friendly, clear, and conversational."
+reference_audio = "voices/refs/tenor.wav"
+preset = "am_michael"         # Kokoro: American male, mid register
+exaggeration = 0.32
+cfg_weight = 0.38
+speed = 0.94
+
+[[voice]]
+id = "alto"
+label = "Friendly Alto"
+description = "Friendly, clear, and conversational."
+reference_audio = "voices/refs/alto.wav"
+preset = "af_heart"           # Kokoro: American female, warm
+exaggeration = 0.32
+cfg_weight = 0.38
+speed = 0.94
